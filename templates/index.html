@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Freshness Detector</title>
+    <style>
+        video {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fruit Freshness Detector</h1>
+    <video id="video" autoplay></video>
+    <br>
+    <button id="capture">Capture Photo</button>
+    <form id="photoForm" action="/predict" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" id="photoInput" style="display: none;">
+        <input type="submit" value="Predict">
+    </form>
+
+    <script>
+        const video = document.getElementById('video');
+        const photoInput = document.getElementById('photoInput');
+        
+        // Access the device camera
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Error accessing camera: ", err);
+            });
+
+        // Capture the photo
+        document.getElementById('capture').addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128;
+            canvas.height = 128;
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, 128, 128);
+            canvas.toBlob(blob => {
+                const file = new File([blob], "captured_image.jpg", { type: "image/jpeg" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                photoInput.files = dataTransfer.files;
+            }, 'image/jpeg');
+        });
+    </script>
+</body>
+</html>
